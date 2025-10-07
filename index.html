@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Floridan Suomi-koulu</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="content/FloridanSuomikoulu_Logo.png" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary-color: #002F6C;
+      --secondary-color: #f8fafc;
+      --accent-color: #06b6d4;
+      --text-primary: #334155;
+      --text-secondary: #64748b;
+      --bg-light: #ffffff;
+      --bg-section: #f1f5f9;
+      --border-light: #e2e8f0;
+      --flag-blue: #002F6C;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --header-height: 163px; /* 124px logo + 3px top + 3px bottom + layout gap */
+      --section-offset: 12px; /* breathing room when scrolling to anchors */
+    }
+
+    /* Dark theme variables (used only when user toggles) */
+    [data-theme="dark"] {
+      --primary-color: #6366f1;
+      --secondary-color: #1e293b;
+      --accent-color: #22d3ee;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --bg-light: #0f172a;
+      --bg-section: #1e293b;
+      --border-light: #334155;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background-color: var(--bg-light);
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* Fixed header (static) */
+    header {
+      background: var(--bg-light);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      height: var(--header-height);
+      box-shadow: var(--shadow-sm);
+      isolation: isolate;
+    }
+
+    nav.header-grid {
+      height: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto; /* logo | center stack | toggle */
+      align-items: center;
+      gap: 24px;
+      padding: 3px 0; /* 3px above and below the logo image */
+    }
+
+    .logo { display: flex; align-items: center; }
+    .logo img {
+      width: 157px;
+      height: 124px;
+      object-fit: contain;
+      background: transparent;
+      display: block;
+    }
+
+    .center-stack {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* vertically centers */
+      gap: 15px;               /* space between title and nav */
+      text-align: center;
+    }
+
+    .school-name {
+      font-size: 40px; /* per your earlier increase */
+      font-weight: 700;
+      color: var(--primary-color);
+      line-height: 1.2;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .nav-links a:hover { color: var(--primary-color); }
+
+    .theme-wrap { display: flex; align-items: center; justify-content: flex-end; height: 100%; }
+    .theme-toggle {
+      background: var(--bg-section);
+      border: 2px solid var(--border-light);
+      border-radius: 50px;
+      width: 50px;
+      height: 28px;
+      cursor: pointer;
+      position: relative;
+      margin-right: 1rem;
+    }
+    .theme-toggle::before {
+      content: '🌙';
+      position: absolute;
+      top: 50%;
+      left: 4px;
+      transform: translateY(-50%);
+      font-size: 14px;
+    }
+    [data-theme="dark"] .theme-toggle::before { content: '☀️'; left: 24px; }
+    [data-theme="dark"] .theme-toggle { background: var(--primary-color); border-color: var(--primary-color); }
+
+    .cta-button {
+      background: var(--flag-blue);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    /* Ensure white text in ALL states */
+    .cta-button,
+    .cta-button:visited,
+    .cta-button:hover,
+    .cta-button:active,
+    .cta-button:focus { color: #fff; }
+
+    .cta-button:hover { background: #4338ca; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+    /* Anchor jump fix: ensure sections land below the fixed header */
+    section[id] { scroll-margin-top: calc(var(--header-height) + var(--section-offset)); }
+
+    /* Hero Section — Finnish flag blue */
+    .hero {
+      background: var(--flag-blue);
+      color: white;
+      padding: 120px 0 80px;
+      text-align: center;
+      margin-top: var(--header-height); /* offset for fixed header */
+    }
+    .hero h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.2; }
+    .hero p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+      max-width: 800px;
+      margin-left: auto; margin-right: auto;
+      white-space: normal;
+    }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: white; color: var(--flag-blue);
+      padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;
+      transition: all 0.3s ease; box-shadow: var(--shadow-md);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1); color: white;
+      padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;
+      border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+
+    /* Groups (Oppiryhmät) — styles can remain; section is commented out */
+    .groups { padding: 80px 0; background: var(--bg-section); }
+    .section-header { text-align: center; margin-bottom: 4rem; }
+    .section-header h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); }
+    .section-header p { font-size: 1.125rem; color: var(--text-secondary); max-width: 750px; margin: 0 auto; }
+    .groups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .group-card {
+      background: var(--bg-light); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease; border: 1px solid var(--border-light);
+    }
+    .group-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+    /* ============ ABOUT SECTION (Tietoa meistä) ============ */
+    .about { padding: 80px 0; }
+    .about-header {
+      max-width: 1000px;
+      margin: 0 auto 3rem;
+      text-align: left; /* paragraph alignment */
+    }
+    .about-header h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    .about-header p {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    .about-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background: var(--bg-light);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Rectangular portrait for desktop (1440p): 391x324 */
+    .about-photo {
+      width: 391px;
+      height: 324px;
+      border-radius: 8px;
+      background: var(--secondary-color);
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    .about-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .about-name {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0.25rem 0 0.25rem;
+    }
+    .about-role {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+    .about-text {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 60ch;
+    }
+
+    /* Contact Section */
+    .contact { padding: 80px 0; background: var(--bg-section); }
+    .contact-card { background: var(--bg-light); padding: 3rem; border-radius: 12px; box-shadow: var(--shadow-sm); max-width: 800px; margin: 0 auto; }
+    .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; margin-bottom: 2rem; }
+    .contact-info h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--text-primary); }
+    .contact-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+    .contact-icon {
+      width: 40px; height: 40px; background: var(--flag-blue); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .contact-details h4 { font-weight: 600; margin-bottom: 0.25rem; color: var(--text-primary); }
+    .contact-details p { color: var(--text-secondary); line-height: 1.5; }
+
+    .social-section h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--text-primary); }
+    .social-buttons { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+
+    /* Base social button style retained for non-Instagram links */
+    .social-btn {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.5rem; background: var(--primary-color); color: white;
+      text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; box-shadow: var(--shadow-sm);
+    }
+    .social-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    .social-btn.facebook { background: #1877f2; }
+    .social-btn.twitter  { background: #1da1f2; }
+    .social-btn.youtube  { background: #ff0000; }
+
+    /* Instagram: no animation; clean inline icon + text; header text color */
+    .social-btn.instagram {
+      background: transparent;         /* no gradient / no filled bg */
+      color: var(--text-primary);      /* match site header text color */
+      box-shadow: none;                /* remove button shadow */
+      padding: 0;                      /* clean inline link with icon */
+      border-radius: 0;
+      gap: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      /* removed transition/animation */
+    }
+    .social-btn.instagram:hover { transform: none; box-shadow: none; }
+    .social-btn.instagram img { width: 32px; height: 32px; display: block; }
+
+    /* Footer */
+    footer { background: var(--text-primary); color: white; padding: 2rem 0; }
+    .footer-bottom { text-align: center; color: #94a3b8; }
+
+    /* Mobile tweaks */
+    @media (max-width: 768px) {
+      .logo img { width: 100px; height: 79px; }
+      .school-name { font-size: 1.3rem; }
+      .nav-links { display: none; }
+      section[id] { scroll-margin-top: calc(var(--header-height) + 8px); }
+      .about-photo { width: 100%; height: auto; aspect-ratio: 391/324; }
+      .social-btn.instagram img { width: 28px; height: 28px; }
+    }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header id="page-header">
+    <nav class="container header-grid">
+      <!-- Left: Logo -->
+      <div class="logo">
+        <img src="content/FloridanSuomikoulu_Logo.png" alt="Floridan Suomi-koulu Logo" />
+      </div>
+
+      <!-- Center: Title + Nav -->
+      <div class="center-stack">
+        <div class="school-name">Floridan Suomi-koulu</div>
+        <ul class="nav-links">
+          <li><a href="#etusivu">Etusivu</a></li>
+          <li><a href="#oppiryhmat">Oppiryhmät</a></li>
+          <li><a href="#about">Tietoa meistä</a></li>
+          <li><a href="#yhteys">Ota yhteyttä</a></li>
+          <li>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSc90YQG1HRK0YdH-SuSuNsWHQMWV-nHQJH25KPSWPrf3y4UEA/viewform?usp=sf_link"
+               class="cta-button" target="_blank" rel="noopener noreferrer">
+              Ilmoittaudu
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right: Theme toggle -->
+      <div class="theme-wrap">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Vaihda tumma tila"></button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="etusivu">
+    <div class="container">
+      <h1>Tervetuloa Floridan Suomi-kouluun</h1>
+      <p>
+        Suomi-koulu starttasi 20 vuoden tauon jälkeen.<br>
+        Nyt lokaationa Annan Maja Heritage Hall, Lake Worthissa!<br>
+        Tule mukaan oppimaan Suomen kulttuuria leikin ja aktiviteettien avulla!
+      </p>
+      <div class="hero-buttons">
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSc90YQG1HRK0YdH-SuSuNsWHQMWV-nHQJH25KPSWPrf3y4UEA/viewform?usp=sf_link"
+          class="btn-primary" target="_blank" rel="noopener noreferrer">Ilmoittautuminen</a>
+        <a href="#yhteys" class="btn-secondary">Kysy lisää</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Groups (Oppiryhmät) — COMMENTED OUT for v1 -->
+  <!--
+  <section class="groups" id="oppiryhmat">
+    <div class="container">
+      <div class="section-header">
+        <h2>Oppiryhmät</h2>
+        <p>
+          Tervetuloa Floridan Suomi-koulun monipuolisten oppiryhmien pariin eri ikäryhmille.<br>
+          3-5-vuotiaille lapsille tarjoamme ryhmän, jossa opitaan peruskielen alkeita, nautitaan satuhetkistä suomalaisilla tarinoilla ja toteutetaan luovia askarteluprojekteja.
+          Ryhmä tarjoaa lapsille hauskaa oppimista suomen kielessä ja kulttuurissa rikastetussa ympäristössä.<br><br>
+          6-10-vuotiaille lapsille löytyy ryhmä, jossa syvennetään suomen kielen taitoja, tutustutaan suomalaiseen kulttuuriin lorujen ja laulujen kautta sekä toteutetaan luovia projekteja.
+        </p>
+      </div>
+      <div class="groups-grid">
+        <div class="group-card">
+          <h3>Lumipantterit (3-5v)</h3>
+          <p>
+            Lumipantterit ovat pienille tutkijoille suunnattu iloinen oppimisympäristö, jossa tutustumme suomen kielen
+            perusteisiin leikkien ja tarinoiden kautta.<br>
+            Jokainen viikko tuo mukanaan uuden seikkailun, jossa opimme yhdessä peruskielen alkeita, kuten värit, numerot ja arkipäivän fraasit.
+            Satuhetket suomalaisilla tarinoilla innostavat mielikuvitusta ja kulttuurintuntemusta, samalla kun luovat askarteluprojektit vahvistavat
+            motorisia taitoja ja ilmaisukykyä.<br>
+            Lumipantterit ovat valmiita tutkimaan maailmaa suomen kielellä ja innolla!
+          </p>
+        </div>
+        <div class="group-card">
+          <h3>Gaattorit (6-10v)</h3>
+          <p>
+            Gaattorit ovat seikkailunhaluisia tutkijoita, jotka syventävät suomen kielen taitojaan monipuolisten aktiviteettien kautta.
+            Kurssimme tarjoavat innostavia oppimismahdollisuuksia.<br>
+            Gaattoreiden ryhmässä jokainen oppilas kehittää sujuvasti suomen kielen taitojaan ja samalla nauttii oppimisesta hauskalla ja innostavalla tavalla.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  -->
+
+  <!-- ABOUT (Tietoa meistä) -->
+  <section class="about" id="about">
+    <div class="container">
+      <!-- Row 1: header centered + paragraph left-aligned -->
+      <div class="about-header">
+        <h2>Tietoa meistä</h2>
+        <p>
+          Olemme kaksi innokasta ja omistautunutta Kristaa, Krista Lilja ja Krista Haapalainen. Yhdistimme voimamme ja intohimomme suomen kieleen ja kulttuuriin luodaksemme tämän erityisen projektin – Suomi-koulun Floridassa. Tällainen mahdollisuus on puuttunut täältä, ja halusimme tuoda sen eloon, jotta suomalaisten lasten ei tarvitsisi unohtaa juuriaan ja kulttuuriaan.<br><br>
+          Molemmat Kristat ovat ylpeitä äitejä, ja haluamme jatkaa suomalaista perinnettä, tarjoten lapsillemme ja muille suomalaisille lapsille mahdollisuuden oppia ja elää suomen kielen ja kulttuurin rikasta maailmaa. Tämä koulu ei ole vain paikka oppia, vaan se on myös yhteisön sydän – paikka, jossa suomalaiset perheet voivat kokoontua, tukea toisiaan ja juhlia yhteistä kulttuuriperintöämme.<br><br>
+          Floridassa asuu lähes 30,000 suomalaista, ja uskomme, että yhdessä voimme rakentaa vahvan, yhtenäisen ja elinvoimaisen suomalaisen yhteisön. Suomi-koulu on loistava tapa pitää yhteisöä yllä, jakaa kokemuksia ja tavata uusia ystäviä.<br>
+          Tervetuloa mukaan luomaan tätä unelmaa kanssamme ja varmistamaan, että suomalainen perinne ja kieli elävät vahvana myös tuleville sukupolville!
+        </p>
+      </div>
+
+      <!-- Row 2: two person intros – photo (391x324) on top, text below -->
+      <div class="about-grid">
+        <!-- Person 1 -->
+        <div class="about-col">
+          <figure class="about-photo">
+            <img src="content/KristaH.jpg" alt="Krista Haapalainen" />
+          </figure>
+          <div class="about-name">Krista Haapalainen</div>
+          <div class="about-role">Perustaja, Puheenjohtaja</div>
+          <div class="about-text">
+            “Culture is the widening of the mind and the spirit”<br>
+            - Nehru<br><br>
+            Opin 7 vuoden aikana New Yorkissa asuessani, että Suomikoulu on tärkeä osa yhteisöä ja suomalaisen kulttuurin ylläpitoa.<br><br>
+            Onkin ilo jatkaa Suomikoulua parin vuosikymmenen jälkeen Floridassa!<br><br>
+            Olen asunut Floridassa kolmisen vuotta ja taustani on markkinoinnissa. Kaikkein parasta on tehda töitä lasten ja lasten mielisten parissa. 
+          </div>
+        </div>
+
+        <!-- Person 2 -->
+        <div class="about-col">
+          <figure class="about-photo">
+            <img src="content/KristaL.jpg" alt="Krista Lilja" />
+          </figure>
+          <div class="about-name">Krista Lilja</div>
+          <div class="about-role">Perustaja, Talousjohtaja</div>
+          <div class="about-text">
+            Olen asunut Floridassa jo kymmenen vuotta ja nähnyt, kuinka tärkeää on säilyttää suomalainen kulttuuriperintömme ja ylläpitää yhteenkuuluvuuden tunnetta ulkosuomalaisten keskuudessa.<br><br>
+            On kunnia olla mukana perustamassa Suomi-koulua tänne Floridaan ja olla osa sen paluuta yli kahdenkymmenen vuoden tauon jälkeen.<br><br>
+            Tällä hetkellä aikani kuluu taloudenhallinnon hommissa ja opinnoissa, mutta musiikki, erityisesti piano, on aina ollut sydäntäni lähellä.<br><br>
+            On ilo ja kunnia työskennellä lasten parissa ja olla osa elinvoimaisen ja monipuolisen suomalaisen yhteisön rakentamista tänne Floridaan.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="contact" id="yhteys">
+    <div class="container">
+      <div class="section-header">
+        <h2>Ota Yhteyttä</h2>
+      </div>
+      <div class="contact-card">
+        <div class="contact-grid">
+          <div class="contact-info">
+            <h3>Yhteystiedot</h3>
+            <div class="contact-item">
+              <div class="contact-icon">📍</div>
+              <div class="contact-details">
+                <h4>Osoite</h4>
+                <p>1800 South Dr<br>Lake Worth Beach, FL 33461</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">📞</div>
+              <div class="contact-details">
+                <h4>Puhelin</h4>
+                <p>(212) 470-4993 | (786) 501-5469</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">✉️</div>
+              <div class="contact-details">
+                <h4>Sähköposti</h4>
+                <p>floridansuomikoulu@gmail.com</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="social-section">
+            <h3>Seuraa Meitä</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Pysy ajan tasalla ohjelmistamme, tapahtumistamme ja oppilaiden saavutuksista!</p>
+            <div class="social-buttons">
+              <!-- Instagram (no animation, opens in new tab) -->
+              <a
+                href="https://www.instagram.com/floridansuomikoulu/"
+                class="social-btn instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Floridan Suomi-koulu Instagram"
+              >
+                <img src="content/Instagram_Glyph_Gradient.png" alt="Instagram" />
+                Instagram
+              </a>
+              <!-- Other socials can be added later -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 FLORIDAN SUOMIKOULU LLC. Kaikki oikeudet pidätetään.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle (light is default; no auto-switching on load)
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      if (next === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    }
+  </script>
+</body>
+</html>
