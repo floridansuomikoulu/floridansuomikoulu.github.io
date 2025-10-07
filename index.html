@@ -148,12 +148,18 @@
       transition: all 0.3s ease;
       box-shadow: var(--shadow-sm);
     }
-    /* Ensure white text in ALL states */
+
+    /* Ensure white text in ALL states; override .nav-links a color */
     .cta-button,
     .cta-button:visited,
     .cta-button:hover,
     .cta-button:active,
-    .cta-button:focus { color: #fff; }
+    .cta-button:focus,
+    .nav-links .cta-button,
+    .nav-links .cta-button:visited,
+    .nav-links .cta-button:hover,
+    .nav-links .cta-button:active,
+    .nav-links .cta-button:focus { color: #fff !important; }
 
     .cta-button:hover { background: #4338ca; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
